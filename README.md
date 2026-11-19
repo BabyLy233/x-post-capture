@@ -27,9 +27,12 @@
 
 ```bash
 pnpm install
-pnpm dev        # 启动开发服务器（加载 .output/chrome-mv3-dev）
-pnpm build      # 生产构建，输出到 .output/chrome-mv3
-pnpm compile    # TypeScript 类型检查
+pnpm dev            # 启动开发服务器（加载 .output/chrome-mv3-dev）
+pnpm build          # 生产构建，输出到 .output/chrome-mv3
+pnpm compile        # TypeScript 类型检查
+pnpm lint           # oxlint 检查
+pnpm format         # oxfmt 格式化
+pnpm crx            # 构建并打包 .output/chrome-mv3.crx
 ```
 
 安装到浏览器：
@@ -37,6 +40,22 @@ pnpm compile    # TypeScript 类型检查
 1. 打开 `chrome://extensions`（Edge 为 `edge://extensions`）。
 2. 开启「开发者模式」。
 3. 点击「加载已解压的扩展程序」，选择 `.output/chrome-mv3` 目录。
+
+## 打包 CRX
+
+```bash
+pnpm crx
+```
+
+会先执行生产构建，然后调用本机 Chrome 打包为 `.output/chrome-mv3.crx`：
+
+- 首次运行会生成签名私钥 `.output/chrome-mv3.pem`，扩展 ID 由该私钥决定；
+- 之后运行会复用同一私钥，扩展 ID 保持不变；
+- 私钥不要提交或分享，丢失后重新打包会变成新的扩展 ID；
+- 可通过环境变量 `CHROME_BIN=/path/to/chrome` 指定浏览器。
+
+安装：打开 `chrome://extensions`，开启开发者模式，把 `.crx` 拖入页面；若被拦截，
+也可以直接「加载已解压的扩展程序」选择 `.output/chrome-mv3`。
 
 ## 使用
 
