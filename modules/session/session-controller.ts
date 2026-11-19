@@ -5,6 +5,7 @@ import type { MaskedItemInfo } from '@/types/messages';
 import type { CaptureSettings, HideMode } from '@/types/settings';
 import { createId, loadRules, saveRules } from '@/modules/settings-store';
 import {
+  applyBuiltinFilters,
   applyMask,
   applyRulesToTweet,
   buildSelectorWithin,
@@ -322,9 +323,14 @@ export class SessionController {
     const article = this.resolveArticle();
     if (!article) return;
     try {
+      // 重新应用前先恢复上一次的规则屏蔽，避免重复隐藏时记录错误的原始样式
+      for (const record of this.masks) {
+        if (record.source === 'rule') restoreMask(record);
+      }
+      this.masks = this.masks.filter((record) => record.source === 'manual');
       const rules = await loadRules();
       const records = applyRulesToTweet(article, rules);
-      this.masks = this.masks.filter((record) => record.source === 'manual');
+      records.push(...applyBuiltinFilters(article));
       this.masks.push(...records);
       this.syncMasks();
     } catch {

@@ -65,6 +65,37 @@ export function restoreAllMasks(records: MaskRecord[]): void {
   }
 }
 
+const QUOTES_SELECTOR = 'a[href*="/quotes"]';
+
+/**
+ * 内置过滤：截图时默认去掉推文底部的「相关」下拉与「查看引用」入口。
+ * 只匹配推文内的链接 / 按钮，不会误伤正文。
+ */
+export function applyBuiltinFilters(article: HTMLElement): MaskRecord[] {
+  const records: MaskRecord[] = [];
+  const seen = new Set<HTMLElement>();
+  const hide = (element: Element | null) => {
+    if (!(element instanceof HTMLElement) || element === article) return;
+    if (seen.has(element)) return;
+    seen.add(element);
+    records.push(applyMask(element, 'remove-space', 'rule'));
+  };
+
+  for (const link of Array.from(article.querySelectorAll<HTMLElement>(QUOTES_SELECTOR))) {
+    hide(link);
+  }
+  for (const control of Array.from(
+    article.querySelectorAll<HTMLElement>('a[role="button"], button, [role="button"]'),
+  )) {
+    const text = (control.textContent ?? '').replace(/\s+/g, '');
+    if (!text) continue;
+    if (text === '相关' || text.startsWith('查看引用')) {
+      hide(control);
+    }
+  }
+  return records;
+}
+
 /**
  * 在推文子树内应用已保存的过滤规则。返回本次实际应用到的记录。
  */
