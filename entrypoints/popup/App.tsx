@@ -1,114 +1,107 @@
-import { useEffect, useMemo, useState } from 'react';
-import { browser } from 'wxt/browser';
+import { useEffect, useMemo, useState } from 'react'
+import { browser } from 'wxt/browser'
 
 import {
   CAPTURE_MODES,
   type CaptureMode,
   type CaptureSettings,
   type DomFilterRule,
-} from '@/types/settings';
-import { isXPage } from '@/modules/tweet/tweet-detector';
-import {
-  loadRules,
-  loadSettings,
-  saveRules,
-  saveSettings,
-} from '@/modules/settings-store';
+} from '@/types/settings'
+import { isXPage } from '@/modules/tweet/tweet-detector'
+import { loadRules, loadSettings, saveRules, saveSettings } from '@/modules/settings-store'
 
-import './App.css';
+import './App.css'
 
 export default function App() {
-  const [settings, setSettings] = useState<CaptureSettings | null>(null);
-  const [rules, setRules] = useState<DomFilterRule[]>([]);
-  const [url, setUrl] = useState<string | null>(null);
-  const [allSitesGranted, setAllSitesGranted] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [settings, setSettings] = useState<CaptureSettings | null>(null)
+  const [rules, setRules] = useState<DomFilterRule[]>([])
+  const [url, setUrl] = useState<string | null>(null)
+  const [allSitesGranted, setAllSitesGranted] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     void (async () => {
       const [storedSettings, storedRules, tabs, granted] = await Promise.all([
         loadSettings(),
         loadRules(),
         browser.tabs.query({ active: true, currentWindow: true }),
         browser.permissions.contains({ origins: ['<all_urls>'] }),
-      ]);
-      if (cancelled) return;
-      setSettings(storedSettings);
-      setRules(storedRules);
-      setUrl(tabs[0]?.url ?? null);
-      setAllSitesGranted(granted);
-    })();
+      ])
+      if (cancelled) return
+      setSettings(storedSettings)
+      setRules(storedRules)
+      setUrl(tabs[0]?.url ?? null)
+      setAllSitesGranted(granted)
+    })()
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
+    }
+  }, [])
 
-  const supported = useMemo(() => (url ? isXPage(url) : false), [url]);
-  const hasOutput = Boolean(
-    settings && (settings.copyToClipboard || settings.downloadToLocal),
-  );
+  const supported = useMemo(() => (url ? isXPage(url) : false), [url])
+  const hasOutput = Boolean(settings && (settings.copyToClipboard || settings.downloadToLocal))
 
   function updateSettings(patch: Partial<CaptureSettings>) {
-    if (!settings) return;
-    const next: CaptureSettings = { ...settings, ...patch, version: 1 };
-    setSettings(next);
+    if (!settings) return
+    const next: CaptureSettings = { ...settings, ...patch, version: 1 }
+    setSettings(next)
     void saveSettings(next).catch(() => {
-      setNotice('设置保存失败，请重试');
-    });
+      setNotice('设置保存失败，请重试')
+    })
   }
 
   async function handleToggleDownload(checked: boolean) {
-    if (!settings) return;
+    if (!settings) return
     // 先保存设置：权限确认可能导致 popup 失去焦点而关闭
-    updateSettings({ downloadToLocal: checked });
-    if (!checked) return;
-    let granted = false;
+    updateSettings({ downloadToLocal: checked })
+    if (!checked) return
+    let granted = false
     try {
       granted = await browser.permissions.request({
         permissions: ['downloads'] as unknown as Parameters<
           typeof browser.permissions.request
         >[0]['permissions'],
-      });
+      })
     } catch {
-      granted = false;
+      granted = false
     }
     if (!granted) {
-      updateSettings({ downloadToLocal: false });
-      setNotice('未获得「管理下载」权限，暂时无法开启下载到本地。');
+      updateSettings({ downloadToLocal: false })
+      setNotice('未获得「管理下载」权限，暂时无法开启下载到本地。')
     }
   }
 
   async function handleToggleAllSites(checked: boolean) {
     if (checked) {
-      let granted = false;
+      let granted = false
       try {
         granted = await browser.permissions.request({
           origins: ['<all_urls>'],
-        });
+        })
       } catch {
-        granted = false;
+        granted = false
       }
-      setAllSitesGranted(granted);
+      setAllSitesGranted(granted)
       if (!granted) {
-        setNotice('未授予所有站点访问权限，无感截图未启用。');
+        setNotice('未授予所有站点访问权限，无感截图未启用。')
       }
-      return;
+      return
     }
     try {
-      await browser.permissions.remove({ origins: ['<all_urls>'] });
+      await browser.permissions.remove({ origins: ['<all_urls>'] })
     } catch {
       // 权限可能已被浏览器回收
     }
-    setAllSitesGranted(false);
+    setAllSitesGranted(false)
   }
 
   async function updateRules(next: DomFilterRule[]) {
-    setRules(next);
+    setRules(next)
     try {
-      await saveRules(next);
+      await saveRules(next)
     } catch {
-      setNotice('过滤规则保存失败');
+      setNotice('过滤规则保存失败')
     }
   }
 
@@ -118,7 +111,7 @@ export default function App() {
         <div className="spinner" />
         正在加载…
       </div>
-    );
+    )
   }
 
   return (
@@ -158,9 +151,8 @@ export default function App() {
       <div className="quick-tip">
         <strong>快速截图</strong>
         <p>
-          在 X 页面上把鼠标移到推文，点击右侧相机按钮立即截图；
-          按住 <kbd>Alt</kbd>（macOS 为 <kbd>Option</kbd>）点击可打开工具栏，
-          在截图前屏蔽推文中的元素。
+          在 X 页面上把鼠标移到推文，点击右侧相机按钮立即截图； 按住 <kbd>Alt</kbd>（macOS 为{' '}
+          <kbd>Option</kbd>）点击可打开工具栏， 在截图前屏蔽推文中的元素。
         </p>
       </div>
 
@@ -172,9 +164,7 @@ export default function App() {
           id="capture-mode"
           className="field-select"
           value={settings.captureMode}
-          onChange={(event) =>
-            updateSettings({ captureMode: event.target.value as CaptureMode })
-          }
+          onChange={(event) => updateSettings({ captureMode: event.target.value as CaptureMode })}
         >
           {CAPTURE_MODES.map((mode) => (
             <option key={mode.value} value={mode.value}>
@@ -217,9 +207,7 @@ export default function App() {
             <small>保存 PNG 到浏览器默认下载目录</small>
           </span>
         </label>
-        {!hasOutput && (
-          <p className="warning">至少需要启用一种输出方式，否则截图按钮将被禁用。</p>
-        )}
+        {!hasOutput && <p className="warning">至少需要启用一种输出方式，否则截图按钮将被禁用。</p>}
       </section>
 
       <section className="section">
@@ -228,15 +216,12 @@ export default function App() {
           <input
             type="checkbox"
             checked={settings.openToolbarOnClick}
-            onChange={(event) =>
-              updateSettings({ openToolbarOnClick: event.target.checked })
-            }
+            onChange={(event) => updateSettings({ openToolbarOnClick: event.target.checked })}
           />
           <span>
             点击按钮时打开工具栏
             <small>
-              便于先屏蔽推文中的元素再截图；关闭时点击按钮直接截图，按住 Alt
-              点击仍可打开工具栏。
+              便于先屏蔽推文中的元素再截图；关闭时点击按钮直接截图，按住 Alt 点击仍可打开工具栏。
             </small>
           </span>
         </label>
@@ -253,8 +238,8 @@ export default function App() {
           <span>
             无感截图
             <small>
-              导航后无需点击扩展图标，也不会出现调试提示条。需要授予所有站点访问权限，
-              扩展实际只在 X 页面运行。
+              导航后无需点击扩展图标，也不会出现调试提示条。需要授予所有站点访问权限， 扩展实际只在
+              X 页面运行。
             </small>
           </span>
         </label>
@@ -271,9 +256,7 @@ export default function App() {
           <span className="count-pill">{rules.length}</span>
         </div>
         {rules.length === 0 ? (
-          <p className="empty-rules">
-            在推文工具栏中屏蔽元素并点击「保存规则」后，会出现在这里。
-          </p>
+          <p className="empty-rules">在推文工具栏中屏蔽元素并点击「保存规则」后，会出现在这里。</p>
         ) : (
           <ul className="rules">
             {rules.map((rule) => (
@@ -313,5 +296,5 @@ export default function App() {
 
       <footer className="footer">设置会立即生效 · 所有截图均在本地处理</footer>
     </div>
-  );
+  )
 }

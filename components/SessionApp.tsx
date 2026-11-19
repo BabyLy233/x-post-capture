@@ -1,13 +1,13 @@
-import { useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react'
 
-import type { SessionController, SessionState } from '@/modules/session/session-controller';
-import type { HideMode } from '@/types/settings';
+import type { SessionController, SessionState } from '@/modules/session/session-controller'
+import type { HideMode } from '@/types/settings'
 
-import styles from './SessionApp.css?inline';
+import styles from './SessionApp.css?inline'
 
 export function SessionApp({ controller }: { controller: SessionController }) {
-  const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
-  if (!state.active) return null;
+  const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot)
+  if (!state.active) return null
   return (
     <div className="xpc-root">
       <style>{styles}</style>
@@ -30,18 +30,12 @@ export function SessionApp({ controller }: { controller: SessionController }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-function Toolbar({
-  controller,
-  state,
-}: {
-  controller: SessionController;
-  state: SessionState;
-}) {
-  const hasOutput = state.settings.copyToClipboard || state.settings.downloadToLocal;
-  const canCapture = Boolean(state.selectedKey) && !state.busy && hasOutput;
+function Toolbar({ controller, state }: { controller: SessionController; state: SessionState }) {
+  const hasOutput = state.settings.copyToClipboard || state.settings.downloadToLocal
+  const canCapture = Boolean(state.selectedKey) && !state.busy && hasOutput
 
   return (
     <div className="xpc-toolbar" role="toolbar" aria-label="X Post Capture 工具栏">
@@ -109,16 +103,10 @@ function Toolbar({
         </button>
       </div>
     </div>
-  );
+  )
 }
 
-function MaskPanel({
-  controller,
-  state,
-}: {
-  controller: SessionController;
-  state: SessionState;
-}) {
+function MaskPanel({ controller, state }: { controller: SessionController; state: SessionState }) {
   return (
     <div className="xpc-panel">
       <div className="xpc-panel-title">
@@ -180,5 +168,5 @@ function MaskPanel({
         </button>
       </div>
     </div>
-  );
+  )
 }

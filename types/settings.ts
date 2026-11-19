@@ -1,23 +1,23 @@
-export type CaptureMode = 'auto' | 'cdp' | 'stitched' | 'viewport';
+export type CaptureMode = 'auto' | 'cdp' | 'stitched' | 'viewport'
 
-export type HideMode = 'remove-space' | 'keep-space';
+export type HideMode = 'remove-space' | 'keep-space'
 
 export interface CaptureSettings {
-  version: 1;
-  captureMode: CaptureMode;
-  copyToClipboard: boolean;
-  downloadToLocal: boolean;
+  version: 1
+  captureMode: CaptureMode
+  copyToClipboard: boolean
+  downloadToLocal: boolean
   /** 点击推文按钮时直接打开工具栏（用于屏蔽元素），而不是立即截图 */
-  openToolbarOnClick: boolean;
+  openToolbarOnClick: boolean
 }
 
 export interface DomFilterRule {
-  id: string;
-  name: string;
-  selector: string;
-  enabled: boolean;
-  hideMode: HideMode;
-  createdAt: number;
+  id: string
+  name: string
+  selector: string
+  enabled: boolean
+  hideMode: HideMode
+  createdAt: number
 }
 
 export const DEFAULT_SETTINGS: CaptureSettings = {
@@ -26,12 +26,12 @@ export const DEFAULT_SETTINGS: CaptureSettings = {
   copyToClipboard: true,
   downloadToLocal: false,
   openToolbarOnClick: false,
-};
+}
 
 export const CAPTURE_MODES: Array<{
-  value: CaptureMode;
-  label: string;
-  description: string;
+  value: CaptureMode
+  label: string
+  description: string
 }> = [
   {
     value: 'auto',
@@ -53,4 +53,4 @@ export const CAPTURE_MODES: Array<{
     label: '当前可视区域',
     description: '只截取屏幕上当前可见的部分，不滚动页面。',
   },
-];
+]
