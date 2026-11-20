@@ -69,7 +69,8 @@ export class HoverButtonHost {
     this.host = document.createElement('div')
     this.host.className = 'xpc-hover-host'
     this.host.setAttribute(OWN_ATTRIBUTE, 'true')
-    this.host.style.cssText = 'position:absolute;display:block;z-index:5;pointer-events:none;'
+    this.host.style.cssText =
+      'position:absolute;display:block;z-index:2147483646;pointer-events:none;'
     this.host.style.display = 'none'
 
     const shadow = this.host.attachShadow({ mode: 'open' })

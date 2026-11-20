@@ -15,6 +15,12 @@ export const TWEET_TIME_SELECTOR = 'time[datetime]'
 
 export const STATUS_LINK_SELECTOR = 'a[href*="/status/"]'
 
+/** 推文头部行右侧按钮（Grok / 更多）的锚点，悬浮按钮默认停靠在它左侧 */
+export const TWEET_HEADER_ANCHOR_SELECTOR = '[aria-label*="Grok" i], [data-testid="caret"]'
+
+/** 推文操作栏中的点赞按钮，用来定位整条操作栏 */
+export const TWEET_ACTION_LIKE_SELECTOR = '[data-testid="like"], [data-testid="unlike"]'
+
 /** 扩展自身注入的节点标记，推文识别与元素选择时必须排除 */
 export const OWN_ATTRIBUTE = 'data-xpc-owned'
 
