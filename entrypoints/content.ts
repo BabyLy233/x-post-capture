@@ -2,6 +2,7 @@ import { browser } from 'wxt/browser'
 
 import { mountSessionUi } from '@/components/mount-session'
 import { buildStitchPlan, measureForCapture, measureGeometry } from '@/modules/capture/geometry'
+import { restorePageOverlays, suppressPageOverlays } from '@/modules/page/capture-overlays'
 import {
   preparePageForCapture,
   waitFrames,
@@ -125,9 +126,12 @@ async function handleContentMessage(
       }
       controller.setUiHidden(message.hidden)
       if (message.hidden) {
+        // 新帖提示等页面浮层可能与推文区域重叠，截图期间一并隐藏
+        suppressPageOverlays()
         // 等待一帧，确保扩展 UI 在截图前已经从渲染结果中消失
         await waitFrames(2)
       } else {
+        restorePageOverlays()
         controller.restoreGeometrySnapshot()
         stitchContainer = null
       }
